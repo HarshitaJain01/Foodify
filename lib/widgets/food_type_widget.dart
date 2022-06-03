@@ -36,7 +36,7 @@ class RecipeCardType extends StatefulWidget {
   }) : super(key: key);
 
   final FoodType items;
-  
+
   @override
   _RecipeCardTypeState createState() => _RecipeCardTypeState();
 }
@@ -111,28 +111,58 @@ class _RecipeCardTypeState extends State<RecipeCardType> {
                       widget.items.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: lightThemeData(context).textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w500),
+                      style: lightThemeData(context)
+                          .textTheme
+                          .subtitle1!
+                          .copyWith(fontWeight: FontWeight.w500),
                     ),
                   ),
                   Row(
                     children: [
-                      const SizedBox(width: 5,),
-                      const Icon(Icons.timer, size: 20,),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      const Icon(
+                        Icons.timer,
+                        size: 20,
+                      ),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 4),
                         child: Text(
                           widget.items.readyInMinutes + " Min",
-                          style: lightThemeData(context).textTheme.subtitle1!.copyWith(color: Colors.green),
+                          style: lightThemeData(context)
+                              .textTheme
+                              .subtitle1!
+                              .copyWith(color: Colors.green),
                           // style: TextStyle(
                           //     fontWeight: FontWeight.bold,
                           //     color: Theme.of(context).primaryColor),
                         ),
                       ),
-                      
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      const Icon(
+                        Icons.food_bank,
+                        size: 20,
+                      ),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+                        child: Text(
+                          widget.items.servings + " Serves",
+                          style: lightThemeData(context)
+                              .textTheme
+                              .subtitle1!
+                              .copyWith(color: Colors.green),
+                          // style: TextStyle(
+                          //     fontWeight: FontWeight.bold,
+                          //     color: Theme.of(context).primaryColor),
+                        ),
+                      ),
                     ],
                   ),
-                  
-                  
                 ],
               ),
             ),
