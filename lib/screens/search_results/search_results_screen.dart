@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +9,21 @@ import 'package:foodify/screens/recipe_info/recipe_info_screen.dart';
 import 'package:foodify/screens/search_results/bloc/search_results_bloc.dart';
 import 'package:foodify/utils/theme.dart';
 import 'package:foodify/widgets/loading_widget.dart';
+import 'package:http/http.dart' as http;
+
+class Recipe {
+  final String spoonacularSourceUrl;
+
+  final int servings;
+//has Equipment, Ingredients, Steps, e.t.c
+  Recipe({required this.spoonacularSourceUrl, required this.servings});
+//The spoonacularSourceURL displays the meals recipe in our webview
+  factory Recipe.fromMap(Map<String, dynamic> map) {
+    return Recipe(
+        spoonacularSourceUrl: map['spoonacularSourceUrl'],
+        servings: map['servings']);
+  }
+}
 
 class SearchResults extends StatefulWidget {
   final String id;
@@ -18,6 +35,7 @@ class SearchResults extends StatefulWidget {
 
 class _SearchResultsState extends State<SearchResults> {
   late final SearchResultsBloc bloc;
+
   @override
   void initState() {
     bloc = BlocProvider.of<SearchResultsBloc>(context);
@@ -33,13 +51,19 @@ class _SearchResultsState extends State<SearchResults> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Image.asset(isDarkMode ? "assets/logo/foodify-text.png": "assets/logo/foodify-text-darktheme.png",height: 65,),
+          title: Image.asset(
+            isDarkMode
+                ? "assets/logo/foodify-text.png"
+                : "assets/logo/foodify-text-darktheme.png",
+            height: 65,
+          ),
           elevation: 0,
           titleSpacing: 0,
-          iconTheme: IconThemeData(color: isDarkMode ? Colors.black : Colors.white),
-          backgroundColor: isDarkMode? lightThemeData(context).scaffoldBackgroundColor : darkThemeData(context).scaffoldBackgroundColor,
-          
-          
+          iconTheme:
+              IconThemeData(color: isDarkMode ? Colors.black : Colors.white),
+          backgroundColor: isDarkMode
+              ? lightThemeData(context).scaffoldBackgroundColor
+              : darkThemeData(context).scaffoldBackgroundColor,
         ),
         body: BlocBuilder<SearchResultsBloc, SearchResultsState>(
           builder: (context, state) {
@@ -158,11 +182,28 @@ class _SearchResultresulttate extends State<SearchResultItem> {
               ),
               Container(
                 padding: const EdgeInsets.all(9),
-                child: Text(
-                  widget.result.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: lightThemeData(context).textTheme.button!.copyWith(fontWeight: FontWeight.w600,fontSize: 16),
+                child: FutureBuilder<int>(
+                  future: fetchRecipe(widget.result.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      try {
+                        return Text(
+                          snapshot.data.toString(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: lightThemeData(context)
+                              .textTheme
+                              .button!
+                              .copyWith(
+                                  fontWeight: FontWeight.w600, fontSize: 16),
+                        );
+                      } catch (Exc) {
+                        print(Exc);
+                        rethrow;
+                      }
+                    }
+                    return Text("L");
+                  },
                 ),
               ),
             ],
@@ -170,5 +211,35 @@ class _SearchResultresulttate extends State<SearchResultItem> {
         ),
       ),
     );
+  }
+}
+
+final String _baseURL = "api.spoonacular.com";
+const String API_KEY = "098fc724ead7426f990c7fe096adb598";
+
+Future<int> fetchRecipe(String id) async {
+  Map<String, String> parameters = {
+    'includeNutrition': 'false',
+    'apiKey': API_KEY,
+  };
+//we call in our recipe id in the Uri, and parse in our parameters
+  Uri uri = Uri.https(
+    _baseURL,
+    '/recipes/$id/information',
+    parameters,
+  );
+//And also specify that we want our header to return a json object
+  Map<String, String> headers = {
+    HttpHeaders.contentTypeHeader: 'application/json',
+  };
+//finally, we put our response in a try catch block
+  try {
+    var response = await http.get(uri, headers: headers);
+    Map<String, dynamic> data = json.decode(response.body);
+    Recipe recipe = Recipe.fromMap(data);
+
+    return recipe.servings;
+  } catch (err) {
+    throw err.toString();
   }
 }

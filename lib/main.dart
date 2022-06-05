@@ -1,5 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodify/screens/home_page/bloc/homerecipes_bloc.dart';
+import 'package:foodify/screens/home_page/home_page.dart';
 import 'package:foodify/screens/loginpage/LoginPage.dart';
 
 import 'package:foodify/utils/theme.dart';
@@ -22,7 +25,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: lightThemeData(context),
       darkTheme: darkThemeData(context),
-      home: LoginPage(),
+      home: BlocProvider(
+        create: (context) => HomeRecipesBloc(),
+        child: const HomeRecipeScreen(),
+      ),
     );
   }
 }
